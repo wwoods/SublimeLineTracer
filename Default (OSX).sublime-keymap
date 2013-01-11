@@ -1,0 +1,5 @@
+[
+    { "keys": [ "super+g" ], "command": "line_tracer_goto",
+        "context": [ { "key": "setting.line_tracer_has_target",
+            "operator": "equal", "operand": true } ] }
+]

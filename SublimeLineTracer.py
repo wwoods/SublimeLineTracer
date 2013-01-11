@@ -7,7 +7,7 @@ import sublime_plugin
 
 /tmp/blah.txt
 Hey here's a file: /tmp/blah.txt
-"/tmp/blah there.txt"
+"/tmp/blah there.txt" and /tmp/hey is also here!
 "/tmp/blah there.txt", line 12
 /tmp/blah:12
 "/tmp/blah there.txt":113
@@ -49,7 +49,7 @@ class LineTracerWatcher(sublime_plugin.EventListener):
         foundRegions = []
 
         # Does our line have a filename?
-        f = self._matchFile(line)
+        f = self._matchFile(line, pos = cursor.a - lineRegion.a)
         if f is not None:
             foundRegions.append(sublime.Region(lineRegion.a + f.start(),
                     lineRegion.a + f.end()))
@@ -63,7 +63,7 @@ class LineTracerWatcher(sublime_plugin.EventListener):
                 target += ':' + lineno.group(0)
         else:
             # Maybe we have a line number...
-            l = re.search("[ \t]*(\d+):", line)
+            l = re.search("^[ \t]*(\d+):", line)
             if l is not None:
                 foundRegions.append(sublime.Region(lineRegion.a + l.start(1),
                         lineRegion.a + l.end(1)))
@@ -86,8 +86,27 @@ class LineTracerWatcher(sublime_plugin.EventListener):
         view.settings().set('line_tracer_has_target', target is not None)
 
 
-    def _matchFile(self, line):
+    def _matchFile(self, line, pos = -1):
         """Returns a regex match for the filename in the given line.
+
+        pos -- If specified, the preferred position that contains the filename.
         """
-        return re.search(r"""("(\.\./|\./|/)[^"]+"|(\.\./|\./|/)[^ \t\n:]+)""",
-                line)
+        bestDist = None
+        bestMatch = None
+        for m in re.finditer(
+                r"""("(\.\./|\./|/)[^"]+"|(\.\./|\./|/)[^ \t\n:]+)""",
+                line):
+            if m.start() <= pos <= m.end():
+                # Cursor is in the file, go with it.
+                return m
+
+            mdist = min(abs(pos - m.start()), abs(pos - m.end()))
+            if bestMatch is None or mdist < bestDist:
+                bestMatch = m
+                bestDist = mdist
+                if pos < 0:
+                    # Optimize!
+                    break
+
+        if bestMatch is not None:
+            return bestMatch

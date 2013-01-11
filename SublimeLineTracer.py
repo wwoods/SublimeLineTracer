@@ -89,4 +89,5 @@ class LineTracerWatcher(sublime_plugin.EventListener):
     def _matchFile(self, line):
         """Returns a regex match for the filename in the given line.
         """
-        return re.search(r"""("/[^"]+"|(\.\./|\./|/)[^ \t\n:]+)""", line)
+        return re.search(r"""("(\.\./|\./|/)[^"]+"|(\.\./|\./|/)[^ \t\n:]+)""",
+                line)

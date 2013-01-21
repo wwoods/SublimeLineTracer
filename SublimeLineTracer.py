@@ -23,8 +23,29 @@ In file /tmp/blah:
 class LineTracerGotoCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         target = self.view.settings().get('line_tracer_target')
-        print(target)
         window = self.view.window()
+
+        # Open the new file in a group (panel) other than the one
+        # it was found in, if possible.  This works better with e.g.
+        # build panes.  But always prefer a pane on top, even if it is the
+        # current pane.
+        curGroup = window.active_group()
+
+        # Prefer a top-level layout when possible...
+        preferredGroups = []
+        groups = window.get_layout()['cells']
+        for i, g in enumerate(groups):
+            if g[1] == 0:
+                # This pane starts at the top
+                preferredGroups.append(i)
+
+        nonCurrent = [ pg for pg in preferredGroups
+                if pg != curGroup ]
+        if nonCurrent:
+            nextGroup = nonCurrent[0]
+        else:
+            nextGroup = curGroup
+        window.focus_group(nextGroup)
         window.open_file(target, sublime.ENCODED_POSITION | sublime.TRANSIENT)
 
     def is_enabled(self):

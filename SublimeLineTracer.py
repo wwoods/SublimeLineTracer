@@ -12,11 +12,17 @@ Hey here's a file: /tmp/blah.txt
 /tmp/blah:12
 "/tmp/blah there.txt":113
 
+http://Ishouldn'tbeafile
+
 ./blah.txt
 
 In file /tmp/blah:
   12: Hey
   18: Yo there
+
+/or/like/this:
+  12: Yo
+  14: Whoahhhh
 
 """
 
@@ -115,7 +121,7 @@ class LineTracerWatcher(sublime_plugin.EventListener):
         bestDist = None
         bestMatch = None
         for m in re.finditer(
-                r"""("(\.\./|\./|/)[^"]+"|(\.\./|\./|/)[^ \t\n:]+)""",
+                r"""(?<!/)(^|(?<=[^a-zA-Z0-9_]))("(\.\./|\./|/)[^"]+"|(\.\./|\./|/)[a-zA-Z0-9_][^ \t\n:]+)""",
                 line):
             if m.start() <= pos <= m.end():
                 # Cursor is in the file, go with it.

@@ -24,6 +24,8 @@ In file /tmp/blah:
   12: Yo
   14: Whoahhhh
 
+<html></html>
+
 """
 
 class LineTracerGotoCommand(sublime_plugin.TextCommand):
@@ -121,7 +123,8 @@ class LineTracerWatcher(sublime_plugin.EventListener):
         bestDist = None
         bestMatch = None
         for m in re.finditer(
-                r"""(?<!/)(^|(?<=[^a-zA-Z0-9_]))("(\.\./|\./|/)[^"]+"|(\.\./|\./|/)[a-zA-Z0-9_][^ \t\n:]+)""",
+                r"""(?<![/<>])(^|(?<=[^a-zA-Z0-9_]))"""
+                r"""("(\.\./|\./|/)[^"]+"|(\.\./|\./|/)[a-zA-Z0-9_][^ \t\n:]+)""",
                 line):
             if m.start() <= pos <= m.end():
                 # Cursor is in the file, go with it.
